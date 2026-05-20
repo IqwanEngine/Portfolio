@@ -1,0 +1,23 @@
+================================================================================
+IQWANENGINE // NEURAL STATE CORE DATA
+================================================================================
+
+[SYSTEM_HASH]: 7f8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d
+[ENCRYPTION]: Crimson-Protocol-SHA256
+[DATE_INITIALIZED]: 2026-05-19
+
+FUNCTIONAL OVERVIEW:
+This file serves as the persistence layer for the IqwanEngine's Neural Link FSM (Finite State Machine). 
+It maps transient user session vectors to the current dialogue state, ensuring that even if 
+the server layer restarts, the context of the 'AI Recruiter' and 'Portfolio Build' paths are 
+temporarily buffered before being permanently etched into the primary SQLite ledger.
+
+SECURITY PERMISSIONS:
+- ROOT ACCESS ONLY (0600)
+- WRITABLE BY: system_core_process
+- READABLE BY: neural_supervisor_service
+- PUBLIC ACCESS: DENIED (REDACTED)
+
+NOTE: Any unauthorized manual modification of this file may result in neural drift 
+and session corruption.
+================================================================================

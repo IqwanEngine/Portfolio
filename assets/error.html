@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IqwanEngine - Recalibrating Neural Network</title>
+    <style>
+        /* Modern reset & CSS custom properties for thematic consistency */
+        :root {
+            --space-black: #030305;
+            --crimson-red: #ef4444;
+            --dim-crimson: rgba(239, 68, 68, 0.45);
+            --glitch-offset-1: -2px;
+            --glitch-offset-2: 2px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--space-black);
+            color: #ffffff;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Subtle scanlines for cyberpunk depth */
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 10;
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+        }
+
+        /* CRT flicker effect */
+        @keyframes crt-flicker {
+            0% { opacity: 0.98; }
+            50% { opacity: 1; }
+            100% { opacity: 0.99; }
+        }
+
+        .container {
+            max-width: 650px;
+            width: 90%;
+            padding: 40px;
+            background: rgba(3, 3, 5, 0.85);
+            border: 1px solid var(--dim-crimson);
+            border-radius: 4px;
+            box-shadow: 0 0 35px rgba(239, 68, 68, 0.1), inset 0 0 15px rgba(239, 68, 68, 0.05);
+            text-align: center;
+            position: relative;
+            z-index: 5;
+            animation: crt-flicker 0.15s infinite;
+        }
+
+        /* Tactical corner decoration accents */
+        .corner {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border: 2px solid transparent;
+            pointer-events: none;
+        }
+        .top-left {
+            top: -2px; left: -2px;
+            border-top-color: var(--crimson-red);
+            border-l-color: var(--crimson-red);
+        }
+        .top-right {
+            top: -2px; right: -2px;
+            border-top-color: var(--crimson-red);
+            border-r-color: var(--crimson-red);
+        }
+        .bottom-left {
+            bottom: -2px; left: -2px;
+            border-bottom-color: var(--crimson-red);
+            border-l-color: var(--crimson-red);
+        }
+        .bottom-right {
+            bottom: -2px; right: -2px;
+            border-bottom-color: var(--crimson-red);
+            border-r-color: var(--crimson-red);
+        }
+
+        /* System Code Badge */
+        .badge {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.35em;
+            color: var(--crimson-red);
+            border: 1px solid var(--dim-crimson);
+            padding: 4px 12px;
+            display: inline-block;
+            margin-bottom: 30px;
+            background: rgba(239, 68, 68, 0.05);
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.05);
+        }
+
+        /* Error code display */
+        .glitch-code {
+            font-size: 5rem;
+            font-weight: 900;
+            color: #ffffff;
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+            position: relative;
+            display: inline-block;
+            text-shadow: 0.05em 0 0 rgba(239, 68, 68, 0.75),
+                        -0.025em -0.05em 0 rgba(0, 191, 255, 0.75),
+                        0.025em 0.05em 0 rgba(0, 255, 0, 0.75);
+            animation: glitch 1s infinite;
+        }
+
+        @keyframes glitch {
+            0% {
+                text-shadow: 0.05em 0 0 rgba(239, 68, 68, 0.75), -0.025em -0.05em 0 rgba(0, 191, 255, 0.75), 0.025em 0.05em 0 rgba(0, 255, 0, 0.75);
+            }
+            14% {
+                text-shadow: 0.05em 0 0 rgba(239, 68, 68, 0.75), -0.025em -0.05em 0 rgba(0, 191, 255, 0.75), 0.025em 0.05em 0 rgba(0, 255, 0, 0.75);
+            }
+            15% {
+                text-shadow: -0.05em -0.025em 0 rgba(239, 68, 68, 0.75), 0.025em 0.025em 0 rgba(0, 191, 255, 0.75), -0.05em -0.05em 0 rgba(0, 255, 0, 0.75);
+            }
+            49% {
+                text-shadow: -0.05em -0.025em 0 rgba(239, 68, 68, 0.75), 0.025em 0.025em 0 rgba(0, 191, 255, 0.75), -0.05em -0.05em 0 rgba(0, 255, 0, 0.75);
+            }
+            50% {
+                text-shadow: 0.025em 0.05em 0 rgba(239, 68, 68, 0.75), 0.05em 0 0 rgba(0, 191, 255, 0.75), 0 -0.05em 0 rgba(0, 255, 0, 0.75);
+            }
+            99% {
+                text-shadow: 0.025em 0.05em 0 rgba(239, 68, 68, 0.75), 0.05em 0 0 rgba(0, 191, 255, 0.75), 0 -0.05em 0 rgba(0, 255, 0, 0.75);
+            }
+            100% {
+                text-shadow: -0.025em 0 0 rgba(239, 68, 68, 0.75), -0.025em -0.025em 0 rgba(0, 191, 255, 0.75), -0.025em -0.05em 0 rgba(0, 255, 0, 0.75);
+            }
+        }
+
+        /* The required copy text */
+        .message {
+            font-size: 14px;
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.85);
+            margin: 20px 0 35px 0;
+            letter-spacing: 0.02em;
+        }
+
+        /* Pulsing core animation indicator */
+        .core-loader {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 20px 0;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--crimson-red);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 8px var(--crimson-red);
+            animation: dot-pulse 1.4s infinite ease-in-out both;
+        }
+
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes dot-pulse {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.3; }
+            40% { transform: scale(1.2); opacity: 1; }
+        }
+
+        /* Decorative Background Elements (Synthesizing/Grid details) */
+        .meta-term {
+            position: absolute;
+            bottom: 20px;
+            font-size: 9px;
+            color: rgba(239, 68, 68, 0.25);
+            font-family: inherit;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+        .left-meta { left: 30px; }
+        .right-meta { right: 30px; }
+
+        .scanlines {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px;
+            z-index: 2;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="scanlines"></div>
+    
+    <div class="container">
+        <!-- Structural Cyberpunk Corners -->
+        <div class="corner top-left"></div>
+        <div class="corner top-right"></div>
+        <div class="corner bottom-left"></div>
+        <div class="corner bottom-right"></div>
+
+        <div class="badge">SYS_STATUS // DRIFT_DETECTED</div>
+        
+        <div>
+            <div class="glitch-code">500</div>
+        </div>
+
+        <div class="core-loader">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+        </div>
+
+        <!-- Copy Requirement -->
+        <p class="message">
+            IqwanEngine is recalibrating its neural network. Please try again later.
+        </p>
+
+        <!-- Command feedback design -->
+        <div style="font-size: 10px; color: rgba(255, 255, 255, 0.25); border-top: 1px solid rgba(239, 68, 68, 0.1); padding-top: 20px;">
+            ERR_STATE_RECONSTRUCT_SEQUENCE_ACTIVE_v3.2
+        </div>
+    </div>
+
+    <!-- Architectural Background telemetry indicators -->
+    <div class="meta-term left-meta">LATENCY: 12MS // BUFFER_HEALTH: 99.4%</div>
+    <div class="meta-term right-meta">SEC_AUDIT: PASS_STRICT // PORT: 3000</div>
+</body>
+</html>
